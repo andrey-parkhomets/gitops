@@ -1,0 +1,30 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kubefirst-argo-events
+  namespace: argocd
+  annotations:
+    kubefirst.konstruct.io/application-name: argo-events
+    kubefirst.konstruct.io/source: catalog-templates
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: argo-events
+    name: in-cluster
+  project: default
+  source:
+    chart: argo-events
+    repoURL: https://argoproj.github.io/argo-helm
+    targetRevision: 2.3.3
+    helm:
+      releaseName: argo-events
+      # values: |
+      #   example: value
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
