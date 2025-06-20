@@ -1,0 +1,18 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: kubefirst
+  namespace: kubefirst
+  annotations:
+    argocd.argoproj.io/sync-wave: '10'
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`kubefirst.kubefirst.dev`)
+      services:
+        - name: kubefirst
+          port: 80
+  tls:
+    secretName: kubefirst-tls

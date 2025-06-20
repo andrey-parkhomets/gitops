@@ -1,0 +1,23 @@
+metaphor:
+  image:
+    repository: ghcr.io/andrey-parkhomets/metaphor
+  imagePullSecrets:
+    - name: docker-config
+  ingress:
+    enabled: true
+    className: ''
+    hosts:
+      - host: metaphor-production.kubefirst.dev
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: metaphor-production-tls
+        hosts:
+          - metaphor-production.kubefirst.dev
+  metaphor:
+    host: https://metaphor-production.kubefirst.dev/api
+    console: https://kubefirst.kubefirst.dev
+  vaultMountPoint: kubefirst
+  vaultSecretPath: production/metaphor
+  originIssuerIsEnabled: false
