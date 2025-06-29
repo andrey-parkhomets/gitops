@@ -27,7 +27,7 @@ jobs:
     #     image: redis
     container:
       # Debian needed for GHA to use cache (uses /bin/tar --posix)
-      image: ghcr.io/runatlantis/atlantis:latest-debian
+      image: ubuntu
       env:
         # Volume mounted outside of /home/atlantis needed for cache action to have privileges to it
         ATLANTIS_DATA_DIR: /atlantis-data
@@ -44,11 +44,13 @@ jobs:
         - ${{ github.workspace }}/atlantis-data:/atlantis-data
     steps:
 
-      - name: Install az-cli
+      - name: Get Atlantis
+        shell: bash
         run: |
-         apt update
-         apt-get install -y azure-cli
-
+          curl -L  https://github.com/runatlantis/atlantis/releases/download/v0.35.0/atlantis_linux_amd64.zip > atlantis_linux_amd64.zip
+          unzip atlantis_linux_amd64.zip
+          mv atlantis /usr/loca/bin/
+          
       - name: Azure CLI script
         uses: azure/cli@v2
         with:
