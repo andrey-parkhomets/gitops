@@ -44,6 +44,11 @@ jobs:
         - ${{ github.workspace }}/atlantis-data:/atlantis-data
     steps:
 
+      - name: Install az-cli
+        run: |
+         apt update
+         apt-get install -y azure-cli
+
       - name: Azure CLI script
         uses: azure/cli@v2
         with:
