@@ -51,7 +51,7 @@ jobs:
           apt-get -y install curl unzip
           curl -L  https://github.com/runatlantis/atlantis/releases/download/v0.35.0/atlantis_linux_amd64.zip > atlantis_linux_amd64.zip
           unzip atlantis_linux_amd64.zip
-          mv atlantis /usr/loca/bin/
+          mv atlantis /usr/local/bin/
 
       - name: Azure CLI script
         uses: azure/cli@v2
