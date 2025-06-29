@@ -1,0 +1,103 @@
+name: 'Atlantis'
+
+on:
+  # Issue comments target default branch so workflow definition in main (rather than PR) is used
+  issue_comment:
+    types:
+      - created
+  pull_request:
+    types:
+      - closed
+
+permissions:
+  checks: write
+  contents: write
+  issues: write
+  pull-requests: write
+  statuses: write
+#  id-token: write # Only needed for AWS creds to interact with GitHub's OIDC Token endpoint
+
+jobs:
+  atlantis:
+    name: Atlantis
+    runs-on: ubuntu-latest
+    # Only for testing purposes, this requires an external Redis instance to handle locks
+    services:
+      redis:
+        image: redis
+    container:
+      # Debian needed for GHA to use cache (uses /bin/tar --posix)
+      image: ghcr.io/runatlantis/atlantis:latest-debian
+      env:
+        # Volume mounted outside of /home/atlantis needed for cache action to have privileges to it
+        ATLANTIS_DATA_DIR: /atlantis-data
+        ATLANTIS_GH_USER: ${{ github.actor }}
+        ATLANTIS_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ATLANTIS_LOCKING_DB_TYPE: redis
+        ATLANTIS_REDIS_HOST: redis
+        ATLANTIS_REPO_ALLOWLIST: github.com/${{ github.repository }}
+        ATLANTIS_DISABLE_AUTOPLAN: true
+      options: --user root
+      volumes:
+        - ${{ github.workspace }}/atlantis-data:/atlantis-data
+    steps:
+#      # Use GitHub's OIDC provider with a configured AWS IAM Identity Provider endpoint to assume role
+#      - name: Configure AWS Credentials
+#        uses: aws-actions/configure-aws-credentials@v2
+#        with:
+#          role-to-assume: arn:aws:iam::123456789100:role/my-terraform-state-role
+#          aws-region: eu-west-1
+
+#       - name: Restore Atlantis data
+#         id: restore-atlantis-data
+#         uses: actions/cache/restore@v3
+#         if: github.event_name == 'issue_comment'
+#         with:
+#           path: /atlantis-data
+#           key: atlantis-data-${{ github.event.issue.number }}
+          
+      - name: Cache Atlantis data
+        id: cache-atlantis-data
+        uses: actions/cache@v3
+        if: github.event_name == 'issue_comment'
+        with:
+          path: /atlantis-data
+          key: atlantis-data-${{ github.event.issue.number }}
+
+      - name: Run Atlantis
+        timeout-minutes: 1
+        run: |
+          # Start server in background
+          atlantis server &
+          atlantis_pid=$!
+          
+          # Wait for Atlantis to start
+          until curl --output /dev/null --silent --fail http://localhost:4141/healthz; do
+            sleep 5
+          done
+          
+          # Relay event
+          curl --silent --request POST \
+            --header 'Content-Type: application/json' \
+            --header 'X-GitHub-Event: ${{ github.event_name }}' \
+            --header 'X-GitHub-Delivery: ${{ github.run_id }}' \
+            --data '${{ toJson(github.event) }}' \
+            http://localhost:4141/events
+          
+          # Wait for Atlantis to run
+          sleep 5
+          until curl --silent http://localhost:4141/status | grep '"in_progress_operations": 0'; do
+            sleep 5
+          done
+          
+          # Wait for Atlantis to exit gracefully (GitHub Actions sends SIGKILL instead of SIGTERM at the end)
+          kill $atlantis_pid
+          wait $atlantis_pid
+
+#       - name: Save Atlantis data
+#         id: save-atlantis-data
+#         uses: actions/cache/save@v3
+#         if: github.event_name == 'issue_comment'
+#         with:
+#           path: /atlantis-data
+#           key: atlantis-data-${{ github.event.issue.number }}
