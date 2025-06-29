@@ -53,12 +53,12 @@ jobs:
           unzip atlantis_linux_amd64.zip
           mv atlantis /usr/local/bin/
 
-      - name: Azure CLI script
-        uses: azure/cli@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-            az version
+      # - name: Azure CLI script
+      #   uses: azure/cli@v2
+      #   with:
+      #     azcliversion: latest
+      #     inlineScript: |
+      #       az version
         
       - name: Azure login
         uses: azure/login@v2
