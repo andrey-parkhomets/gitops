@@ -21,7 +21,9 @@ permissions:
 jobs:
   login:
     runs-on: ubuntu-latest
-
+    container:
+      image: ubuntu
+      options: --hostname abc
     steps:
       - name: Azure login
         uses: azure/login@v2
@@ -36,6 +38,7 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
+            hostname
             TOKEN=$(az account get-access-token --query accessToken -o tsv| openssl enc -aes-256-cbc -pbkdf2 -salt -k "${{ secrets.ENCRYPTION_PASSWORD }}"| base64 -w0)
             echo token=$TOKEN >> $GITHUB_OUTPUT
 
@@ -45,6 +48,7 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
+            hostname
             ENCRYPTED_SECRET=${{ steps.get-token.outputs.token }};
             TOKEN=$(echo -n "$ENCRYPTED_SECRET" | base64  -di --decode| openssl enc -aes-256-cbc -pbkdf2 -d -salt -k "${{ secrets.ENCRYPTION_PASSWORD }}");
             az login \
@@ -59,12 +63,18 @@ jobs:
 
     needs: [login]
     runs-on: ubuntu-latest
+    container:
+      image: ubuntu
+      options: --hostname abc
+
+    
 
     steps:
       # Step 1: Decrypt the token using OpenSSL
       - id: decrypt-token
         shell: bash
         run: |
+          hostname
           ENCRYPTED_SECRET=${{ needs.login.outputs.token }};
           TOKEN=$(echo -n "$ENCRYPTED_SECRET" | base64  -di| openssl enc -aes-256-cbc -pbkdf2 -d -salt -k "${{ secrets.ENCRYPTION_PASSWORD }}");
           echo ::add-mask::"$TOKEN"
@@ -76,6 +86,7 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
+            hostname
             az login \
               --service-principal \
               --username ${{ secrets.AZURE_CLIENT_ID }} \
