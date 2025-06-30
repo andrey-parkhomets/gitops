@@ -67,7 +67,6 @@ jobs:
               --service-principal \
               --username ${{ secrets.AZURE_CLIENT_ID }} \
               --tenant ${{ secrets.AZURE_TENANT_ID }} \
-              --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }} \
               --federated-token ${{ steps.decrypt-token.outputs.token }}
 
 #   atlantis:
