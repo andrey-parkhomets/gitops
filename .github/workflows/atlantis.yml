@@ -21,8 +21,7 @@ permissions:
 jobs:
   login:
     runs-on: ubuntu-latest
-    outputs:
-      token: ${{ steps.get-token.outputs.token }}
+
     steps:
       - name: Azure login
         uses: azure/login@v2
@@ -37,19 +36,36 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-            TOKEN=$(az account get-access-token --query accessToken -o tsv|base64|base64)
+            TOKEN=$(az account get-access-token --query accessToken -o tsv|base64 -w 0|base64 -w 0)
             echo "::add-mask::$TOKEN"
             echo token=$TOKEN >> $GITHUB_OUTPUT
+            PASSWORD=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13; echo)
+            echo "::add-mask::$PASSWORD"
+            echo password=$PASSWORD >> $GITHUB_OUTPUT
 
+      - uses: cloudposse/github-action-secret-outputs@main
+        id: secret
+        with:
+          secret: ${{ steps.get-token.outputs.PASSWORD }}
+          op: encode
+          in: ${{ steps.get-token.outputs.token }}
+    outputs:
+      token: ${{ steps.get-token.outputs.token }}
+      password: ${{ steps.get-token.outputs.password }}
   other-job:
-    if: needs.login.outputs.token != ''
-    needs: login
+
+    needs: [login]
     runs-on: ubuntu-latest
-    env:
-      TOKEN: ${{ needs.login.outputs.token }}
+
     steps:
-      - name: Debug output token
-        run: echo "Token is ${{ env.TOKEN }}"
+      - uses: cloudposse/github-action-secret-outputs@main
+        id: token
+        with:
+          ## PASSWORD is a gpg passphrase stored in Github Secrets.          
+          secret: ${{ needs.login.outputs.password }}
+          op: decode
+          in: ${{ needs.login.outputs.token }}
+
       - name: Azure CLI script
         uses: azure/cli@v2
         with:
@@ -60,7 +76,7 @@ jobs:
               --username ${{ secrets.AZURE_CLIENT_ID }} \
               --tenant ${{ secrets.AZURE_TENANT_ID }} \
               --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }} \
-              --federated-token $(${{ env.TOKEN }} |base64 -d |base64 -d )
+              --federated-token ${{ steps.token.outputs.out }}
 
 #   atlantis:
 #     name: Atlantis
