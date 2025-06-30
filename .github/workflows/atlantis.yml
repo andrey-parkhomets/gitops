@@ -44,6 +44,7 @@ jobs:
             echo "TOKEN=$TOKEN" >> $GITHUB_OUTPUT
 
   other-job:
+    if: needs.login.outputs.token != ''
     needs: login
     runs-on: ubuntu-latest
     env:
