@@ -37,11 +37,9 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-            az account show
-            echo "=========================="
             TOKEN=$(az account get-access-token --query accessToken -o tsv)
             echo "::add-mask::$TOKEN"
-            echo "TOKEN=$TOKEN" >> $GITHUB_OUTPUT
+            echo token=$TOKEN >> $GITHUB_OUTPUT
 
   other-job:
     if: needs.login.outputs.token != ''
