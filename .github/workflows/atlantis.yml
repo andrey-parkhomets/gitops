@@ -47,7 +47,8 @@ jobs:
     needs: login
     runs-on: ubuntu-latest
     steps:
-
+      - name: Debug output token
+        run: echo "Token is ${{ needs.login.outputs.token }}"
       - name: Azure CLI script
         uses: azure/cli@v2
         with:
