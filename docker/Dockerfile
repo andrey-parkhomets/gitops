@@ -1,16 +1,16 @@
 
-ARG _GOLANG_VERSION="1.24.3"
-ARG _DOCKER_VERSION="28.1.1"
+ARG _GOLANG_VERSION="1.24.4"
+ARG _DOCKER_VERSION="28.3.0"
 ARG _UBUNTU_VERSION="24.04"
 
 FROM golang:${_GOLANG_VERSION} AS go-builder
-ARG _TRIVY_VERSION="0.62.1"
+ARG _TRIVY_VERSION="0.63.0"
 ARG _ORAS_VERSION="1.2.3"
-ARG _NEKTOS_ACT_VERSION="0.2.77"
-ARG _KUBECONFORM_VERSION="0.6.7"
-ARG _YQ_VERSION="4.45.2"
+ARG _NEKTOS_ACT_VERSION="0.2.78"
+ARG _KUBECONFORM_VERSION="0.7.0"
+ARG _YQ_VERSION="4.45.4"
 ARG _UPX_VERSION="5.0.1"
-ARG _SNAPCHART="221782b" # v0.4.3
+ARG _SNAPCHART="37eb1fe" # v0.5.0
 ARG _TERRAFORM_CONFIG_INSPECT="d2d12f9" # latest
 ARG _HCL2JSON="0.6.7"
 # COPY go.mod ./
@@ -58,7 +58,7 @@ RUN set -ex ;\
 # Final stage
 
 FROM ubuntu:${_UBUNTU_VERSION}
-ARG _NODE_VERSION="24.0.0"
+ARG _NODE_VERSION="24.3.0"
 ENV _NVM_VERSION="0.40.3"
 # Copy all build artifacts from go-builder to ./bin dir
 COPY --from=go-builder /go/bin /usr/local/bin/
@@ -116,7 +116,7 @@ RUN set -x ;\
 
 # Install dond-shim to /usr/local/bin/dond
 # original file https://github.com/felipecrs/docker-on-docker-shim/blob/main/dond
-ARG _DOND_SHIM_VERSION="8954de6" #"0.7.1"
+ARG _DOND_SHIM_VERSION="d3f4b04" #"0.7.1"
 ENV _DOND_SHIM_PATH="/usr/local/bin/dond"
 ENV _DOCKER_PATH="/usr/local/bin/docker"
 RUN mv -f "${_DOCKER_PATH}" "${_DOCKER_PATH}.orig"
