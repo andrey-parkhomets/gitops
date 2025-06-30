@@ -40,8 +40,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build@v3
         with:
-          context: .
-          file: ./Dockerfile
+          context: ./docker
+          file: ./docker/Dockerfile
           push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
