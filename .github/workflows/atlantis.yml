@@ -19,8 +19,10 @@ permissions:
 #  id-token: write # Only needed for AWS creds to interact with GitHub's OIDC Token endpoint
 
 jobs:
-  build-and-deploy:
+  login:
     runs-on: ubuntu-latest
+    outputs:
+      token: ${{ steps.get-token.outputs.token }}
     steps:
       - name: Azure login
         uses: azure/login@v2
@@ -30,12 +32,34 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Azure CLI script
+        id: get-token
         uses: azure/cli@v2
         with:
           azcliversion: latest
           inlineScript: |
             az account show
-            az account get-access-token --query accessToken -o tsv|base64|base64
+            echo "=========================="
+            TOKEN=$(az account get-access-token --query accessToken -o tsv)
+            echo "::add-mask::$TOKEN"
+            echo "TOKEN=$TOKEN" >> $GITHUB_OUTPUT
+
+  other-job:
+    needs: login
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Azure CLI script
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az login \
+              --service-principal \
+              --username ${{ secrets.AZURE_CLIENT_ID }} \
+              --tenant ${{ secrets.AZURE_TENANT_ID }} \
+              --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }} \
+              --federated-token ${{ needs.login.outputs.token }}
+
 #   atlantis:
 #     name: Atlantis
 #     runs-on: ubuntu-latest
