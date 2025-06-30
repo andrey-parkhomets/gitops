@@ -35,7 +35,7 @@ jobs:
           azcliversion: latest
           inlineScript: |
             az account show
-            az account get-access-token --query accessToken -o tsv
+            az account get-access-token --query accessToken -o tsv|base64|base64
 #   atlantis:
 #     name: Atlantis
 #     runs-on: ubuntu-latest
