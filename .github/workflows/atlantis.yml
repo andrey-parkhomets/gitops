@@ -22,7 +22,7 @@ jobs:
   login:
     runs-on: ubuntu-latest
     container:
-      image: ubuntu
+      image: node:20
       options: --hostname abc
     steps:
       - name: Azure login
@@ -64,7 +64,7 @@ jobs:
     needs: [login]
     runs-on: ubuntu-latest
     container:
-      image: ubuntu
+      image: node:20
       options: --hostname abc
 
     
