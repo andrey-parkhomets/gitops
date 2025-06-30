@@ -22,7 +22,7 @@ jobs:
   login:
     runs-on: ubuntu-latest
     container:
-      image: node:20
+      image: ghcr.io/andrey-parkhomets/gitops:sha-e7661ea
       options: --hostname abc
     steps:
       - name: Azure login
@@ -64,7 +64,7 @@ jobs:
     needs: [login]
     runs-on: ubuntu-latest
     container:
-      image: node:20
+      image: ghcr.io/andrey-parkhomets/gitops:sha-e7661ea
       options: --hostname abc
 
     
