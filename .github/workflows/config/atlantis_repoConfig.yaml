@@ -25,8 +25,8 @@ workflows:
             # Reduce Terraform suggestion output
             name: TF_IN_AUTOMATION
             value: 'true'
-        - init: null
-        - plan: null
+        - init:
+        - plan:
 
     apply:
       steps:
@@ -40,4 +40,4 @@ workflows:
             name: TF_IN_AUTOMATION
             value: 'true'
         - run: terragrunt apply -input=false $PLANFILE
-        - apply: null
+        - apply:
