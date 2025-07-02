@@ -81,8 +81,9 @@ jobs:
         timeout-minutes: 1
         run: |
           # Start server in background
-          az account list -o table
-          atlantis server --repo-config .github/workflows/config/atlantis_repoConfig.yaml &
+
+          #--repo-config .github/workflows/config/atlantis_repoConfig.yaml
+          atlantis server  &
           atlantis_pid=$!
           
           # Wait for Atlantis to start
