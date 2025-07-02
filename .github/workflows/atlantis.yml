@@ -90,6 +90,7 @@ jobs:
             --header 'X-GitHub-Event: ${{ github.event_name }}' \
             --header 'X-GitHub-Delivery: ${{ github.run_id }}' \
             --data '${{ toJson(github.event) }}' \
+            --repo-config ./config/atlantis_repoConfig.yaml \
             http://localhost:4141/events
           
           # Wait for Atlantis to run
