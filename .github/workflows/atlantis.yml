@@ -15,16 +15,48 @@ permissions:
   issues: write
   pull-requests: write
   statuses: write
-  id-token: write
 #  id-token: write # Only needed for AWS creds to interact with GitHub's OIDC Token endpoint
 
 jobs:
-  login:
+  atlantis:
+    name: Atlantis
     runs-on: ubuntu-latest
+    # Only for testing purposes, this requires an external Redis instance to handle locks
+    # services:
+    #   redis:
+    #     image: redis
     container:
-      image: ghcr.io/andrey-parkhomets/gitops:sha-e7661ea
-      options: --hostname abc
+      # Debian needed for GHA to use cache (uses /bin/tar --posix)
+      image: ghcr.io/andrey-parkhomets/gitops:sha-285d121
+      env:
+        # Volume mounted outside of /home/atlantis needed for cache action to have privileges to it
+        ATLANTIS_DATA_DIR: /atlantis-data
+        ATLANTIS_GH_USER: ${{ github.actor }}
+        ATLANTIS_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ATLANTIS_LOCKING_DB_TYPE: redis
+        ATLANTIS_REDIS_HOST: ${{ secrets.REDIS_HOST }} #redis
+        ATLANTIS_REDIS_PASSWORD: ${{secrets.REDIS_PASSWORD  }}
+        ATLANTIS_REDIS_PORT: ${{secrets.REDIS_PORT  }}
+        ATLANTIS_REPO_ALLOWLIST: github.com/${{ github.repository }}
+        ATLANTIS_DISABLE_AUTOPLAN: true
+      options: --user root
+      volumes:
+        - ${{ github.workspace }}/atlantis-data:/atlantis-data
     steps:
+#      # Use GitHub's OIDC provider with a configured AWS IAM Identity Provider endpoint to assume role
+#      - name: Configure AWS Credentials
+#        uses: aws-actions/configure-aws-credentials@v2
+#        with:
+#          role-to-assume: arn:aws:iam::123456789100:role/my-terraform-state-role
+#          aws-region: eu-west-1
+
+#       - name: Restore Atlantis data
+#         id: restore-atlantis-data
+#         uses: actions/cache/restore@v3
+#         if: github.event_name == 'issue_comment'
+#         with:
+#           path: /atlantis-data
+#           key: atlantis-data-${{ github.event.issue.number }}
       - name: Azure login
         uses: azure/login@v2
         with:
@@ -32,173 +64,48 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Azure CLI script
-        id: get-token
-        uses: azure/cli@v2
+      - name: Cache Atlantis data
+        id: cache-atlantis-data
+        uses: actions/cache@v3
+        if: github.event_name == 'issue_comment'
         with:
-          azcliversion: latest
-          inlineScript: |
-            hostname
-            TOKEN=$(az account get-access-token --query accessToken -o tsv| openssl enc -aes-256-cbc -pbkdf2 -salt -k "${{ secrets.ENCRYPTION_PASSWORD }}"| base64 -w0)
-            echo token=$TOKEN >> $GITHUB_OUTPUT
+          path: /atlantis-data
+          key: atlantis-data-${{ github.event.issue.number }}
 
-      - name: Azure CLI script
-        id: login-token
-        uses: azure/cli@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-            hostname
-            ENCRYPTED_SECRET=${{ steps.get-token.outputs.token }};
-            TOKEN=$(echo -n "$ENCRYPTED_SECRET" | base64  -di --decode| openssl enc -aes-256-cbc -pbkdf2 -d -salt -k "${{ secrets.ENCRYPTION_PASSWORD }}");
-            az login \
-              --service-principal \
-              --username ${{ secrets.AZURE_CLIENT_ID }} \
-              --tenant ${{ secrets.AZURE_TENANT_ID }} \
-              --federated-token $TOKEN
-    outputs:
-      token: ${{ steps.get-token.outputs.token }}
-
-  other-job:
-
-    needs: [login]
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/andrey-parkhomets/gitops:sha-e7661ea
-      options: --hostname abc
-
-    
-
-    steps:
-      # Step 1: Decrypt the token using OpenSSL
-      - id: decrypt-token
-        shell: bash
+      - name: Run Atlantis
+        timeout-minutes: 1
         run: |
-          hostname
-          ENCRYPTED_SECRET=${{ needs.login.outputs.token }};
-          TOKEN=$(echo -n "$ENCRYPTED_SECRET" | base64  -di| openssl enc -aes-256-cbc -pbkdf2 -d -salt -k "${{ secrets.ENCRYPTION_PASSWORD }}");
-          echo ::add-mask::"$TOKEN"
-          echo "token=$TOKEN" >> $GITHUB_OUTPUT
-
-
-      - name: Azure CLI script
-        uses: azure/cli@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-            hostname
-            az login \
-              --service-principal \
-              --username ${{ secrets.AZURE_CLIENT_ID }} \
-              --tenant ${{ secrets.AZURE_TENANT_ID }} \
-              --federated-token ${{ steps.decrypt-token.outputs.token }}
-
-#   atlantis:
-#     name: Atlantis
-#     runs-on: ubuntu-latest
-#     # Only for testing purposes, this requires an external Redis instance to handle locks
-#     # services:
-#     #   redis:
-#     #     image: redis
-#     container:
-#       # Debian needed for GHA to use cache (uses /bin/tar --posix)
-#       image: ubuntu
-#       env:
-#         # Volume mounted outside of /home/atlantis needed for cache action to have privileges to it
-#         ATLANTIS_DATA_DIR: /atlantis-data
-#         ATLANTIS_GH_USER: ${{ github.actor }}
-#         ATLANTIS_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#         ATLANTIS_LOCKING_DB_TYPE: redis
-#         ATLANTIS_REDIS_HOST: ${{ secrets.REDIS_HOST }} #redis
-#         ATLANTIS_REDIS_PASSWORD: ${{secrets.REDIS_PASSWORD  }}
-#         ATLANTIS_REDIS_PORT: ${{secrets.REDIS_PORT  }}
-#         ATLANTIS_REPO_ALLOWLIST: github.com/${{ github.repository }}
-#         ATLANTIS_DISABLE_AUTOPLAN: true
-#       options: --user root
-#       volumes:
-#         - ${{ github.workspace }}/atlantis-data:/atlantis-data
-#     steps:
-
-#       - name: Get Atlantis
-#         shell: bash
-#         run: |
-#           apt update
-#           apt-get -y install curl unzip
-#           curl -L  https://github.com/runatlantis/atlantis/releases/download/v0.35.0/atlantis_linux_amd64.zip > atlantis_linux_amd64.zip
-#           unzip atlantis_linux_amd64.zip
-#           mv atlantis /usr/local/bin/
-
-#       # - name: Azure CLI script
-#       #   uses: azure/cli@v2
-#       #   with:
-#       #     azcliversion: latest
-#       #     inlineScript: |
-#       #       az version
-        
-#       - name: Azure login
-#         uses: azure/login@v2
-#         with:
-#           client-id: ${{ secrets.AZURE_CLIENT_ID }}
-#           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-#           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-# #      # Use GitHub's OIDC provider with a configured AWS IAM Identity Provider endpoint to assume role
-# #      - name: Configure AWS Credentials
-# #        uses: aws-actions/configure-aws-credentials@v2
-# #        with:
-# #          role-to-assume: arn:aws:iam::123456789100:role/my-terraform-state-role
-# #          aws-region: eu-west-1
-
-# #       - name: Restore Atlantis data
-# #         id: restore-atlantis-data
-# #         uses: actions/cache/restore@v3
-# #         if: github.event_name == 'issue_comment'
-# #         with:
-# #           path: /atlantis-data
-# #           key: atlantis-data-${{ github.event.issue.number }}
+          # Start server in background
+          atlantis server &
+          atlantis_pid=$!
           
-#       - name: Cache Atlantis data
-#         id: cache-atlantis-data
-#         uses: actions/cache@v3
+          # Wait for Atlantis to start
+          until curl --output /dev/null --silent --fail http://localhost:4141/healthz; do
+            sleep 5
+          done
+          
+          # Relay event
+          curl --silent --request POST \
+            --header 'Content-Type: application/json' \
+            --header 'X-GitHub-Event: ${{ github.event_name }}' \
+            --header 'X-GitHub-Delivery: ${{ github.run_id }}' \
+            --data '${{ toJson(github.event) }}' \
+            http://localhost:4141/events
+          
+          # Wait for Atlantis to run
+          sleep 5
+          until curl --silent http://localhost:4141/status | grep '"in_progress_operations": 0'; do
+            sleep 5
+          done
+          
+          # Wait for Atlantis to exit gracefully (GitHub Actions sends SIGKILL instead of SIGTERM at the end)
+          kill $atlantis_pid
+          wait $atlantis_pid
+
+#       - name: Save Atlantis data
+#         id: save-atlantis-data
+#         uses: actions/cache/save@v3
 #         if: github.event_name == 'issue_comment'
 #         with:
 #           path: /atlantis-data
 #           key: atlantis-data-${{ github.event.issue.number }}
-
-#       - name: Run Atlantis
-#         timeout-minutes: 1
-#         run: |
-#           # Start server in background
-#           atlantis server &
-#           atlantis_pid=$!
-          
-#           # Wait for Atlantis to start
-#           until curl --output /dev/null --silent --fail http://localhost:4141/healthz; do
-#             sleep 5
-#           done
-          
-#           # Relay event
-#           curl --silent --request POST \
-#             --header 'Content-Type: application/json' \
-#             --header 'X-GitHub-Event: ${{ github.event_name }}' \
-#             --header 'X-GitHub-Delivery: ${{ github.run_id }}' \
-#             --data '${{ toJson(github.event) }}' \
-#             http://localhost:4141/events
-          
-#           # Wait for Atlantis to run
-#           sleep 5
-#           until curl --silent http://localhost:4141/status | grep '"in_progress_operations": 0'; do
-#             sleep 5
-#           done
-          
-#           # Wait for Atlantis to exit gracefully (GitHub Actions sends SIGKILL instead of SIGTERM at the end)
-#           kill $atlantis_pid
-#           wait $atlantis_pid
-
-# #       - name: Save Atlantis data
-# #         id: save-atlantis-data
-# #         uses: actions/cache/save@v3
-# #         if: github.event_name == 'issue_comment'
-# #         with:
-# #           path: /atlantis-data
-# #           key: atlantis-data-${{ github.event.issue.number }}
