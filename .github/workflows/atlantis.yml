@@ -40,8 +40,8 @@ jobs:
         ATLANTIS_REPO_ALLOWLIST: github.com/${{ github.repository }}
         ATLANTIS_DISABLE_AUTOPLAN: true
       options: --user root
-      volumes:
-        - ${{ github.workspace }}/atlantis-data:/atlantis-data
+      # volumes:
+      #   - ${{ github.workspace }}/atlantis-data:/atlantis-data
     steps:
 #      # Use GitHub's OIDC provider with a configured AWS IAM Identity Provider endpoint to assume role
 #      - name: Configure AWS Credentials
@@ -58,7 +58,7 @@ jobs:
         uses: actions/cache/restore@v3
         if: github.event_name == 'issue_comment'
         with:
-          path: /atlantis-data
+          path: ${{ github.workspace }}/atlantis-data
           key: atlantis-data-${{ github.event.issue.number }}
       - name: Azure login
         uses: azure/login@v2
@@ -72,7 +72,7 @@ jobs:
         uses: actions/cache@v3
         if: github.event_name == 'issue_comment'
         with:
-          path: /atlantis-data
+          path: ${{ github.workspace }}/atlantis-data
           key: atlantis-data-${{ github.event.issue.number }}
 
 
@@ -82,7 +82,6 @@ jobs:
           # Start server in background
           df -h
           ls -la 
-          # mkdir -p /atlantis-data/bin
           #--repo-config .github/workflows/config/atlantis_repoConfig.yaml
           atlantis server  &
           atlantis_pid=$!
@@ -115,5 +114,5 @@ jobs:
         uses: actions/cache/save@v3
         if: github.event_name == 'issue_comment'
         with:
-          path: /atlantis-data
+          path: ${{ github.workspace }}/atlantis-data
           key: atlantis-data-${{ github.event.issue.number }}
