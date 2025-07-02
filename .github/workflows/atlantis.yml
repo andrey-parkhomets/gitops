@@ -82,7 +82,8 @@ jobs:
         run: |
           # Start server in background
           df -h
-          ls -la /atlantis-data
+          ls -la 
+          mkdir -p /atlantis-data/bin
           #--repo-config .github/workflows/config/atlantis_repoConfig.yaml
           atlantis server  &
           atlantis_pid=$!
