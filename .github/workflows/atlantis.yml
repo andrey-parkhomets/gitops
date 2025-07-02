@@ -72,11 +72,17 @@ jobs:
           path: /atlantis-data
           key: atlantis-data-${{ github.event.issue.number }}
 
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
       - name: Run Atlantis
         timeout-minutes: 1
         run: |
           # Start server in background
-          atlantis server --repo-config ./config/atlantis_repoConfig.yaml &
+          ls -la
+          atlantis server --repo-config .github/workflows/config/atlantis_repoConfig.yaml &
           atlantis_pid=$!
           
           # Wait for Atlantis to start
