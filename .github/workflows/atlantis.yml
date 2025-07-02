@@ -15,7 +15,7 @@ permissions:
   issues: write
   pull-requests: write
   statuses: write
-#  id-token: write # Only needed for AWS creds to interact with GitHub's OIDC Token endpoint
+  id-token: write # Only needed for AWS creds to interact with GitHub's OIDC Token endpoint
 
 jobs:
   atlantis:
