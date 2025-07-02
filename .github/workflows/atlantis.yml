@@ -27,7 +27,7 @@ jobs:
     #     image: redis
     container:
       # Debian needed for GHA to use cache (uses /bin/tar --posix)
-      image: ghcr.io/andrey-parkhomets/gitops:sha-285d121
+      image: ghcr.io/andrey-parkhomets/gitops:sha-285d121 # atlantis + azure-cli
       env:
         # Volume mounted outside of /home/atlantis needed for cache action to have privileges to it
         ATLANTIS_DATA_DIR: /atlantis-data
@@ -50,10 +50,8 @@ jobs:
 #          role-to-assume: arn:aws:iam::123456789100:role/my-terraform-state-role
 #          aws-region: eu-west-1
 
-      # - name: Checkout code
-      #   uses: actions/checkout@v4
-      #   with:
-      #     fetch-depth: 1
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Restore Atlantis data
         id: restore-atlantis-data
