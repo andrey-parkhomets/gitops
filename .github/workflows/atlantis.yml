@@ -81,7 +81,7 @@ jobs:
         timeout-minutes: 1
         run: |
           # Start server in background
-          ls -la
+          az login -o none --identity
           atlantis server --repo-config .github/workflows/config/atlantis_repoConfig.yaml &
           atlantis_pid=$!
           
