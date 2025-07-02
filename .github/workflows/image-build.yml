@@ -4,8 +4,13 @@ on:
   workflow_dispatch:
   push:
     branches: ["main"]
+    paths:
+      - "docker/**"
+
   pull_request:
     branches: ["main"]
+    paths:
+      - "docker/**"
 
 env:
   REGISTRY: ghcr.io
@@ -55,7 +60,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./docker
-          file: ./docker/Dockerfile
+          file: ./docker/Dockerfile.debian
           push: ${{ github.event_name == 'push' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

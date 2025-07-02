@@ -1,0 +1,30 @@
+FROM ghcr.io/runatlantis/atlantis:v0.35.0-debian
+USER root
+
+RUN set -ex;\
+    apt-get update ;\
+    apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release;\
+    mkdir -p /etc/apt/keyrings ;\
+    curl -sLS https://packages.microsoft.com/keys/microsoft.asc |gpg --dearmor | tee /etc/apt/keyrings/microsoft.gpg > /dev/null ;\
+    chmod go+r /etc/apt/keyrings/microsoft.gpg
+
+RUN AZ_DIST=$(lsb_release -cs) \
+    && DPKG_ARCH=$(dpkg --print-architecture) \
+    && cat <<EOF >/etc/apt/sources.list.d/azure-cli.sources
+Types: deb
+URIs: https://packages.microsoft.com/repos/azure-cli/
+Suites: ${AZ_DIST}
+Components: main
+Architectures: ${DPKG_ARCH}
+Signed-by: /etc/apt/keyrings/microsoft.gpg
+EOF
+
+ARG AZ_VER=2.75.0
+#  install the CLI
+RUN set -ex && \
+    AZ_DIST=$(lsb_release -cs) ;\
+    apt-get update && \
+    apt-get install -y azure-cli=${AZ_VER}-1~${AZ_DIST} && \
+    rm -rf /var/lib/apt/lists/*
+
+USER atlantis

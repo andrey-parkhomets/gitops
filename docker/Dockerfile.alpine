@@ -1,0 +1,37 @@
+# Build stage
+FROM alpine:3.21.3 AS builder
+
+# Install build dependencies
+RUN apk add --no-cache --update \
+    python3 \
+    py3-pip \
+    gcc \
+    musl-dev \
+    python3-dev \
+    libffi-dev \
+    openssl-dev \
+    cargo \
+    make
+
+# Create and activate virtual environment, install Azure CLI
+RUN python3 -m venv /opt/venv \
+    && . /opt/venv/bin/activate \
+    && pip install --upgrade pip \
+    && pip install --no-cache-dir azure-cli
+
+# Final stage
+FROM ghcr.io/runatlantis/atlantis:v0.35.0
+
+USER root
+# Install runtime dependencies only
+RUN apk add --no-cache --update \
+    python3 \
+    && rm -rf /var/cache/apk/*
+
+# Copy virtual environment from builder stage
+COPY --from=builder /opt/venv /opt/venv
+
+USER  atlantis
+# Update PATH to include the virtual environment
+ENV PATH="/opt/venv/bin:$PATH"
+
