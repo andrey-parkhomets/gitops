@@ -50,6 +50,11 @@ jobs:
 #          role-to-assume: arn:aws:iam::123456789100:role/my-terraform-state-role
 #          aws-region: eu-west-1
 
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          
       - name: Restore Atlantis data
         id: restore-atlantis-data
         uses: actions/cache/restore@v3
@@ -72,10 +77,6 @@ jobs:
           path: /atlantis-data
           key: atlantis-data-${{ github.event.issue.number }}
 
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
 
       - name: Run Atlantis
         timeout-minutes: 1
