@@ -6,7 +6,10 @@ repos:
       - approved
     allowed_overrides:
       - workflow
-    allow_custom_workflows: true
+    allow_custom_workflows: false
+    allowed_workflows:
+      - dev
+      - noworkflow
     workflow: noworkflow
 workflows:
   noworkflow:
