@@ -76,7 +76,7 @@ jobs:
         timeout-minutes: 1
         run: |
           # Start server in background
-          atlantis server &
+          atlantis server --repo-config ./config/atlantis_repoConfig.yaml &
           atlantis_pid=$!
           
           # Wait for Atlantis to start
@@ -90,7 +90,6 @@ jobs:
             --header 'X-GitHub-Event: ${{ github.event_name }}' \
             --header 'X-GitHub-Delivery: ${{ github.run_id }}' \
             --data '${{ toJson(github.event) }}' \
-            --repo-config ./config/atlantis_repoConfig.yaml \
             http://localhost:4141/events
           
           # Wait for Atlantis to run
