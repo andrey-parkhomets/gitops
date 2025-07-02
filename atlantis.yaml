@@ -6,6 +6,7 @@ projects:
     autoplan:
       enabled: true
       when_modified: ['**/*.tf', '*.tf*']
+
   - dir: terraform/users
     terraform_version: 1.3.8
     autoplan:
@@ -21,3 +22,4 @@ projects:
     autoplan:
       enabled: false
       when_modified: ['**/*.tf', '*.tf*']
+    workflow: dev
