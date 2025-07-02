@@ -10,7 +10,7 @@ repos:
     allowed_workflows:
       - dev
       - noworkflow
-    workflow: noworkflow
+    workflow: dev
 workflows:
   noworkflow:
     plan:
