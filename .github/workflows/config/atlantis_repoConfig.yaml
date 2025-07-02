@@ -16,7 +16,6 @@ workflows:
   dev:
     plan:
       steps:
-        - run: az login -o none --identity
         - run: echo "===== Plan Stage"
         - env:
             name: ARM_SUBSCRIPTION_ID
@@ -30,7 +29,6 @@ workflows:
 
     apply:
       steps:
-        - run: az login -o none --identity
         - run: echo "===== Apply Stage"
         - env:
             name: ARM_SUBSCRIPTION_ID
