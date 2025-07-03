@@ -80,6 +80,7 @@ jobs:
         timeout-minutes: 1
         run: |
           # Start server in background
+          ls -la ${GITHUB_WORKSPACE}/atlantis-data
           echo "===================="
           pwd
           echo "===================="
