@@ -80,6 +80,7 @@ jobs:
         timeout-minutes: 1
         run: |
           # Start server in background
+          set -x
           df -h
           echo "===================="
           pwd
@@ -87,7 +88,10 @@ jobs:
           id
           echo "===================="
           ls -la /
+          echo "===================="
           ls -la /__w/atlantis-data
+          echo "===================="
+          touch /__w/atlantis-data/test.txt
           mkdir -p /__w/atlantis-data/bin
           echo "===================="
           #
