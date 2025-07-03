@@ -7,30 +7,4 @@ projects:
       enabled: false
       when_modified: ['**/*.tf', '*.tf*']
     workflow: dev
-workflows:
 
-  dev:
-    plan:
-      steps:
-        - run: echo "===== Plan Stage"
-        - env:
-            name: ARM_SUBSCRIPTION_ID
-            value: 16311667-b599-473f-b4c6-0152bace79a0
-        - env:
-            # Reduce Terraform suggestion output
-            name: TF_IN_AUTOMATION
-            value: 'true'
-        - init
-        - plan
-
-    apply:
-      steps:
-        - run: echo "===== Apply Stage"
-        - env:
-            name: ARM_SUBSCRIPTION_ID
-            value: 16311667-b599-473f-b4c6-0152bace79a0
-        - env:
-            # Reduce Terraform suggestion output
-            name: TF_IN_AUTOMATION
-            value: 'true'
-        - apply
