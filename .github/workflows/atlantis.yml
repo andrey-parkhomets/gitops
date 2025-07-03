@@ -100,8 +100,8 @@ jobs:
       - name: Save Atlantis data
         id: save-atlantis-data
         uses: actions/cache/save@v4
-        if: github.event_name == 'issue_comment' || github.event_name == 'pull_request'
+        if: always() && steps.restore-atlantis-data.outputs.cache-hit != 'true'
         with:
           path: ${{github.workspace}}/atlantis-data
-          key: atlantis-data
+          key: ${{ steps.restore-atlantis-data.outputs.cache-primary-key }}
     
