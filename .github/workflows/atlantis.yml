@@ -55,13 +55,13 @@ jobs:
         with:
           path: ${{ github.workspace }}
 
-      - name: Restore Atlantis data
-        id: restore-atlantis-data
-        uses: actions/cache/restore@v4
-        if: github.event_name == 'issue_comment'
-        with:
-          path: /__w/atlantis-data
-          key: atlantis-data-${{ github.event.issue.number }}
+      # - name: Restore Atlantis data
+      #   id: restore-atlantis-data
+      #   uses: actions/cache/restore@v4
+      #   if: github.event_name == 'issue_comment'
+      #   with:
+      #     path: /__w/atlantis-data
+      #     key: atlantis-data-${{ github.event.issue.number }}
       - name: Azure login
         uses: azure/login@v2
         with:
@@ -82,7 +82,7 @@ jobs:
         timeout-minutes: 1
         run: |
           # Start server in background
-          set -x
+          # set -x
           df -h
           echo "===================="
           pwd
@@ -93,8 +93,8 @@ jobs:
           echo "===================="
           ls -la /__w/atlantis-data
           echo "===================="
-          touch /__w/atlantis-data/test.txt
-          mkdir -p /__w/atlantis-data/bin
+          # touch /__w/atlantis-data/test.txt
+          # mkdir -p /__w/atlantis-data/bin
           echo "===================="
           #
           atlantis server --repo-config .github/workflows/config/atlantis_repoConfig.yaml &
@@ -123,10 +123,10 @@ jobs:
           kill $atlantis_pid
           wait $atlantis_pid
 
-      - name: Save Atlantis data
-        id: save-atlantis-data
-        uses: actions/cache/save@v4
-        if: github.event_name == 'issue_comment'
-        with:
-          path: /__w/atlantis-data
-          key: atlantis-data-${{ github.event.issue.number }}
+      # - name: Save Atlantis data
+      #   id: save-atlantis-data
+      #   uses: actions/cache/save@v4
+      #   if: github.event_name == 'issue_comment'
+      #   with:
+      #     path: /__w/atlantis-data
+      #     key: atlantis-data-${{ github.event.issue.number }}
