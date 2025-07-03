@@ -81,14 +81,14 @@ jobs:
         run: |
           # Start server in background
           df -h
-          ls -la /
-          ls -la /__w
-          mkdir -p /__w/atlantis-data/bin
           echo "===================="
           pwd
           echo "===================="
           id
-          ls -la 
+          echo "===================="
+          ls -la /
+          ls -la /__w/atlantis-data
+          mkdir -p /__w/atlantis-data/bin
           echo "===================="
           #
           atlantis server --repo-config .github/workflows/config/atlantis_repoConfig.yaml &
