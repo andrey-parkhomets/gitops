@@ -92,7 +92,7 @@ jobs:
           ls -la /__w
           echo "===================="
           mkdir -p /__w/atlantis-data
-          ls -la /__w/atlantis-data
+          ls -la /__w/atlantis-data/*
           echo "===================="
           # touch /__w/atlantis-data/test.txt
           # mkdir -p /__w/atlantis-data/bin
