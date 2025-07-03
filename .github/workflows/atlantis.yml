@@ -30,7 +30,7 @@ jobs:
       image: ghcr.io/andrey-parkhomets/gitops:sha-285d121 # atlantis + azure-cli
       env:
         # Volume mounted outside of /home/atlantis needed for cache action to have privileges to it
-        ATLANTIS_DATA_DIR: /__w/atlantis-data
+        ATLANTIS_DATA_DIR: atlantis-data
         ATLANTIS_GH_USER: ${{ github.actor }}
         ATLANTIS_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ATLANTIS_LOCKING_DB_TYPE: redis
@@ -55,13 +55,17 @@ jobs:
         with:
           path: ${{ github.workspace }}
 
-      - name: Restore Atlantis data
-        id: restore-atlantis-data
-        uses: actions/cache/restore@v4
-        if: github.event_name == 'issue_comment'
-        with:
-          path: /__w/atlantis-data
-          key: atlantis-data-${{ github.event.issue.number }}
+      - name: create folder for Atlantis data
+        timeout-minutes: 1
+        run: |
+          mkdir -p atlantis-data
+      # - name: Restore Atlantis data
+      #   id: restore-atlantis-data
+      #   uses: actions/cache/restore@v4
+      #   if: github.event_name == 'issue_comment'
+      #   with:
+      #     path: atlantis-data
+      #     key: atlantis-data-${{ github.event.issue.number }}
       - name: Azure login
         uses: azure/login@v2
         with:
@@ -74,7 +78,7 @@ jobs:
         uses: actions/cache@v4
         if: github.event_name == 'issue_comment'
         with:
-          path: /__w/atlantis-data
+          path: atlantis-data
           key: atlantis-data-${{ github.event.issue.number }}
 
 
@@ -82,20 +86,8 @@ jobs:
         timeout-minutes: 1
         run: |
           # Start server in background
-          # set -x
-          df -h
           echo "===================="
-          pwd
-          echo "===================="
-          id
-          echo "===================="
-          ls -la /__w
-          echo "===================="
-          mkdir -p /__w/atlantis-data
-          ls -la /__w/atlantis-data/*
-          echo "===================="
-          # touch /__w/atlantis-data/test.txt
-          # mkdir -p /__w/atlantis-data/bin
+          ls -la atlantis-data/*
           echo "===================="
           #
           atlantis server --repo-config .github/workflows/config/atlantis_repoConfig.yaml &
@@ -123,11 +115,3 @@ jobs:
           # Wait for Atlantis to exit gracefully (GitHub Actions sends SIGKILL instead of SIGTERM at the end)
           kill $atlantis_pid
           wait $atlantis_pid
-
-      # - name: Save Atlantis data
-      #   id: save-atlantis-data
-      #   uses: actions/cache/save@v4
-      #   if: github.event_name == 'issue_comment'
-      #   with:
-      #     path: /__w/atlantis-data
-      #     key: atlantis-data-${{ github.event.issue.number }}
