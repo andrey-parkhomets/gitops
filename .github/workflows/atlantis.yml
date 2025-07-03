@@ -30,7 +30,7 @@ jobs:
       image: ghcr.io/andrey-parkhomets/gitops:sha-285d121 # atlantis + azure-cli
       env:
         # Volume mounted outside of /home/atlantis needed for cache action to have privileges to it
-        ATLANTIS_DATA_DIR: atlantis-data
+        # ATLANTIS_DATA_DIR: atlantis-data
         ATLANTIS_GH_USER: ${{ github.actor }}
         ATLANTIS_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ATLANTIS_LOCKING_DB_TYPE: redis
@@ -78,10 +78,10 @@ jobs:
         run: |
           # Start server in background
           echo "===================="
-          ls -la atlantis-data/*
+          ls -la
           echo "===================="
           #
-          atlantis server --repo-config .github/workflows/config/atlantis_repoConfig.yaml &
+          atlantis server --repo-config .github/workflows/config/atlantis_repoConfig.yaml --data-dir ${GITHUB_WORKSPACE}/atlantis-data &
           atlantis_pid=$!
           
           # Wait for Atlantis to start
