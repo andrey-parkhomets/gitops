@@ -93,6 +93,7 @@ module "aks" {
         hours = [22, 23]
       },
     ]
+
     not_allowed = [
       {
         start = "2035-01-01T20:00:00Z",
