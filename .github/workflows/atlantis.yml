@@ -27,10 +27,10 @@ jobs:
     #     image: redis
     container:
       # Debian needed for GHA to use cache (uses /bin/tar --posix)
-      image: ghcr.io/andrey-parkhomets/gitops:sha-285d121
+      image: ghcr.io/andrey-parkhomets/gitops:sha-285d121 # atlantis + azure-cli
       env:
         # Volume mounted outside of /home/atlantis needed for cache action to have privileges to it
-        ATLANTIS_DATA_DIR: /atlantis-data
+        ATLANTIS_DATA_DIR: ${{ github.workspace }}/atlantis-data
         ATLANTIS_GH_USER: ${{ github.actor }}
         ATLANTIS_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ATLANTIS_LOCKING_DB_TYPE: redis
@@ -40,8 +40,8 @@ jobs:
         ATLANTIS_REPO_ALLOWLIST: github.com/${{ github.repository }}
         ATLANTIS_DISABLE_AUTOPLAN: true
       options: --user root
-      volumes:
-        - ${{ github.workspace }}/atlantis-data:/atlantis-data
+      # volumes:
+      #   - ${{ github.workspace }}/atlantis-data:/atlantis-data
     steps:
 #      # Use GitHub's OIDC provider with a configured AWS IAM Identity Provider endpoint to assume role
 #      - name: Configure AWS Credentials
@@ -50,13 +50,16 @@ jobs:
 #          role-to-assume: arn:aws:iam::123456789100:role/my-terraform-state-role
 #          aws-region: eu-west-1
 
-#       - name: Restore Atlantis data
-#         id: restore-atlantis-data
-#         uses: actions/cache/restore@v3
-#         if: github.event_name == 'issue_comment'
-#         with:
-#           path: /atlantis-data
-#           key: atlantis-data-${{ github.event.issue.number }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Restore Atlantis data
+        id: restore-atlantis-data
+        uses: actions/cache/restore@v3
+        if: github.event_name == 'issue_comment'
+        with:
+          path: ${{ github.workspace }}/atlantis-data
+          key: atlantis-data-${{ github.event.issue.number }}
       - name: Azure login
         uses: azure/login@v2
         with:
@@ -69,14 +72,17 @@ jobs:
         uses: actions/cache@v3
         if: github.event_name == 'issue_comment'
         with:
-          path: /atlantis-data
+          path: ${{ github.workspace }}/atlantis-data
           key: atlantis-data-${{ github.event.issue.number }}
+
 
       - name: Run Atlantis
         timeout-minutes: 1
         run: |
           # Start server in background
-          atlantis server &
+          ls -la 
+          #
+          atlantis server --repo-config .github/workflows/config/atlantis_repoConfig.yaml &
           atlantis_pid=$!
           
           # Wait for Atlantis to start
@@ -102,10 +108,10 @@ jobs:
           kill $atlantis_pid
           wait $atlantis_pid
 
-#       - name: Save Atlantis data
-#         id: save-atlantis-data
-#         uses: actions/cache/save@v3
-#         if: github.event_name == 'issue_comment'
-#         with:
-#           path: /atlantis-data
-#           key: atlantis-data-${{ github.event.issue.number }}
+      - name: Save Atlantis data
+        id: save-atlantis-data
+        uses: actions/cache/save@v3
+        if: github.event_name == 'issue_comment'
+        with:
+          path: ${{ github.workspace }}/atlantis-data
+          key: atlantis-data-${{ github.event.issue.number }}
