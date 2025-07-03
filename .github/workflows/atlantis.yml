@@ -30,7 +30,7 @@ jobs:
       image: ghcr.io/andrey-parkhomets/gitops:sha-285d121 # atlantis + azure-cli
       env:
         # Volume mounted outside of /home/atlantis needed for cache action to have privileges to it
-        ATLANTIS_DATA_DIR: ${{ github.workspace }}/atlantis-data
+        ATLANTIS_DATA_DIR: /__w/gitops/atlantis-data
         ATLANTIS_GH_USER: ${{ github.actor }}
         ATLANTIS_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ATLANTIS_LOCKING_DB_TYPE: redis
@@ -41,7 +41,7 @@ jobs:
         ATLANTIS_DISABLE_AUTOPLAN: true
       options: --user root
       volumes:
-        - ${{ github.workspace }}/atlantis-data:/__w/gitops/gitops/atlantis-data
+        - ${{ github.workspace }}/atlantis-data:/__w/gitops/atlantis-data
     steps:
 #      # Use GitHub's OIDC provider with a configured AWS IAM Identity Provider endpoint to assume role
 #      - name: Configure AWS Credentials
@@ -58,7 +58,7 @@ jobs:
         uses: actions/cache/restore@v4
         if: github.event_name == 'issue_comment'
         with:
-          path: /__w/gitops/gitops/atlantis-data
+          path: /__w/gitops/atlantis-data
           key: atlantis-data-${{ github.event.issue.number }}
       - name: Azure login
         uses: azure/login@v2
@@ -72,7 +72,7 @@ jobs:
         uses: actions/cache@v4
         if: github.event_name == 'issue_comment'
         with:
-          path: /__w/gitops/gitops/atlantis-data
+          path: /__w/gitops/atlantis-data
           key: atlantis-data-${{ github.event.issue.number }}
 
 
@@ -118,5 +118,5 @@ jobs:
         uses: actions/cache/save@v4
         if: github.event_name == 'issue_comment'
         with:
-          path: /__w/gitops/gitops/atlantis-data
+          path: /__w/gitops/atlantis-data
           key: atlantis-data-${{ github.event.issue.number }}
