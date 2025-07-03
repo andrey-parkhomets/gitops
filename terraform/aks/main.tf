@@ -90,7 +90,7 @@ module "aks" {
     allowed = [
       {
         day   = "Sunday",
-        hours = [22, 23]
+        hours = [21, 22, 23]
       },
     ]
 
