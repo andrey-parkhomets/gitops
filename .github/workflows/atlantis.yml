@@ -40,8 +40,8 @@ jobs:
         ATLANTIS_REPO_ALLOWLIST: github.com/${{ github.repository }}
         ATLANTIS_DISABLE_AUTOPLAN: true
       options: --user root
-      # volumes:
-      #   - ${{ github.workspace }}/atlantis-data:/atlantis-data
+      volumes:
+        - ${{ github.workspace }}/atlantis-data:/__w/atlantis-data
     steps:
 #      # Use GitHub's OIDC provider with a configured AWS IAM Identity Provider endpoint to assume role
 #      - name: Configure AWS Credentials
@@ -55,7 +55,7 @@ jobs:
 
       - name: Restore Atlantis data
         id: restore-atlantis-data
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         if: github.event_name == 'issue_comment'
         with:
           path: ${{ github.workspace }}/atlantis-data
@@ -69,7 +69,7 @@ jobs:
 
       - name: Cache Atlantis data
         id: cache-atlantis-data
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         if: github.event_name == 'issue_comment'
         with:
           path: ${{ github.workspace }}/atlantis-data
@@ -114,7 +114,7 @@ jobs:
 
       - name: Save Atlantis data
         id: save-atlantis-data
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v4
         if: github.event_name == 'issue_comment'
         with:
           path: ${{ github.workspace }}/atlantis-data
