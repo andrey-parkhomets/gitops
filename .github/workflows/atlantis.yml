@@ -56,15 +56,15 @@ jobs:
       - name: create folder for Atlantis data
         timeout-minutes: 1
         run: |
-          mkdir -p atlantis-data
-          ls -la 
+          mkdir -p ${GITHUB_WORKSPACE}/atlantis-data
+          ls -la ${GITHUB_WORKSPACE}
           pwd
       - name: Restore Atlantis data
         id: restore-atlantis-data
         uses: actions/cache/restore@v4
         if: github.event_name == 'issue_comment'
         with:
-          path: ./atlantis-data
+          path: ${{github.workspace}}/atlantis-data
           key: atlantis-data-${{ github.event.issue.number }}
       - name: Azure login
         uses: azure/login@v2
@@ -112,6 +112,6 @@ jobs:
         uses: actions/cache/save@v4
         if: github.event_name == 'issue_comment'
         with:
-          path: ./atlantis-data
+          path: ${{github.workspace}}/atlantis-data
           key: atlantis-data-${{ github.event.issue.number }}
     
