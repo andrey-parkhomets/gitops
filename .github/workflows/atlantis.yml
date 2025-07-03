@@ -40,8 +40,8 @@ jobs:
         ATLANTIS_REPO_ALLOWLIST: github.com/${{ github.repository }}
         ATLANTIS_DISABLE_AUTOPLAN: true
       options: --user root
-      volumes:
-        - ${{ github.workspace }}/atlantis-data:/__w/atlantis-data
+      # volumes:
+      #   - ${{ github.workspace }}/atlantis-data:/__w/atlantis-data
     steps:
 #      # Use GitHub's OIDC provider with a configured AWS IAM Identity Provider endpoint to assume role
 #      - name: Configure AWS Credentials
@@ -50,8 +50,10 @@ jobs:
 #          role-to-assume: arn:aws:iam::123456789100:role/my-terraform-state-role
 #          aws-region: eu-west-1
 
-      # - name: Checkout code
-      #   uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
 
       - name: Restore Atlantis data
         id: restore-atlantis-data
@@ -87,7 +89,7 @@ jobs:
           echo "===================="
           id
           echo "===================="
-          ls -la /
+          ls -la /__w
           echo "===================="
           ls -la /__w/atlantis-data
           echo "===================="
