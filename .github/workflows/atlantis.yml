@@ -40,8 +40,8 @@ jobs:
         ATLANTIS_REPO_ALLOWLIST: github.com/${{ github.repository }}
         ATLANTIS_DISABLE_AUTOPLAN: true
       options: --user root
-      # volumes:
-      #   - ${{ github.workspace }}/atlantis-data:/__w/atlantis-data
+      volumes:
+        - ${{ github.workspace }}/atlantis-data:/__w/gitops/gitops/atlantis-data
     steps:
 #      # Use GitHub's OIDC provider with a configured AWS IAM Identity Provider endpoint to assume role
 #      - name: Configure AWS Credentials
@@ -80,7 +80,7 @@ jobs:
         timeout-minutes: 1
         run: |
           # Start server in background
-          ls -la ${GITHUB_WORKSPACE}/atlantis-data
+          ls -la 
           echo "===================="
           pwd
           echo "===================="
