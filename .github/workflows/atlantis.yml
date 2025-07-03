@@ -7,7 +7,7 @@ on:
       - created
   pull_request:
     types:
-      - closed
+      - opened
 
 permissions:
   checks: write
@@ -34,7 +34,7 @@ jobs:
         ATLANTIS_REDIS_PASSWORD: ${{secrets.REDIS_PASSWORD  }}
         ATLANTIS_REDIS_PORT: ${{secrets.REDIS_PORT  }}
         ATLANTIS_REPO_ALLOWLIST: github.com/${{ github.repository }}
-        ATLANTIS_DISABLE_AUTOPLAN: true
+        ATLANTIS_DISABLE_AUTOPLAN: false
       options: --user root
 
     steps:
