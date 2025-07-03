@@ -57,7 +57,8 @@ jobs:
         timeout-minutes: 1
         run: |
           mkdir -p ${GITHUB_WORKSPACE}/atlantis-data
-          ls -la ${GITHUB_WORKSPACE}
+          ls -la ${GITHUB_WORKSPACE}/atlantis-data/*
+          tree ${GITHUB_WORKSPACE}/atlantis-data
           pwd
       - name: Restore Atlantis data
         id: restore-atlantis-data
