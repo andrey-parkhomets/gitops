@@ -21,10 +21,6 @@ jobs:
   atlantis:
     name: Atlantis
     runs-on: ubuntu-latest
-    # Only for testing purposes, this requires an external Redis instance to handle locks
-    # services:
-    #   redis:
-    #     image: redis
     container:
       # Debian needed for GHA to use cache (uses /bin/tar --posix)
       image: ghcr.io/andrey-parkhomets/gitops:sha-285d121 # atlantis + azure-cli
@@ -40,15 +36,8 @@ jobs:
         ATLANTIS_REPO_ALLOWLIST: github.com/${{ github.repository }}
         ATLANTIS_DISABLE_AUTOPLAN: true
       options: --user root
-      # volumes:
-      #   - ${{ github.workspace }}/atlantis-data:/__w/atlantis-data
+
     steps:
-#      # Use GitHub's OIDC provider with a configured AWS IAM Identity Provider endpoint to assume role
-#      - name: Configure AWS Credentials
-#        uses: aws-actions/configure-aws-credentials@v2
-#        with:
-#          role-to-assume: arn:aws:iam::123456789100:role/my-terraform-state-role
-#          aws-region: eu-west-1
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -64,7 +53,7 @@ jobs:
         if: github.event_name == 'issue_comment'
         with:
           path: ${{github.workspace}}/atlantis-data
-          key: atlantis-data-${{ github.event.issue.number }}
+          key: atlantis-data
       - name: Azure login
         uses: azure/login@v2
         with:
@@ -112,5 +101,5 @@ jobs:
         if: github.event_name == 'issue_comment'
         with:
           path: ${{github.workspace}}/atlantis-data
-          key: atlantis-data-${{ github.event.issue.number }}
+          key: atlantis-data
     
