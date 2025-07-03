@@ -52,35 +52,26 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          path: ${{ github.workspace }}
 
       - name: create folder for Atlantis data
         timeout-minutes: 1
         run: |
           mkdir -p atlantis-data
-      # - name: Restore Atlantis data
-      #   id: restore-atlantis-data
-      #   uses: actions/cache/restore@v4
-      #   if: github.event_name == 'issue_comment'
-      #   with:
-      #     path: atlantis-data
-      #     key: atlantis-data-${{ github.event.issue.number }}
+          ls -la 
+          pwd
+      - name: Restore Atlantis data
+        id: restore-atlantis-data
+        uses: actions/cache/restore@v4
+        if: github.event_name == 'issue_comment'
+        with:
+          path: ./atlantis-data
+          key: atlantis-data-${{ github.event.issue.number }}
       - name: Azure login
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Cache Atlantis data
-        id: cache-atlantis-data
-        uses: actions/cache@v4
-        if: github.event_name == 'issue_comment'
-        with:
-          path: atlantis-data
-          key: atlantis-data-${{ github.event.issue.number }}
-
 
       - name: Run Atlantis
         timeout-minutes: 1
@@ -115,3 +106,12 @@ jobs:
           # Wait for Atlantis to exit gracefully (GitHub Actions sends SIGKILL instead of SIGTERM at the end)
           kill $atlantis_pid
           wait $atlantis_pid
+
+      - name: Save Atlantis data
+        id: save-atlantis-data
+        uses: actions/cache/save@v4
+        if: github.event_name == 'issue_comment'
+        with:
+          path: ./atlantis-data
+          key: atlantis-data-${{ github.event.issue.number }}
+    
