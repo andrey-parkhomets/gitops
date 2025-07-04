@@ -48,14 +48,15 @@ jobs:
         timeout-minutes: 1
         run: |
           mkdir -p ${GITHUB_WORKSPACE}/atlantis-data
-          pwd
       - name: Restore Atlantis data
         id: restore-atlantis-data
         uses: actions/cache/restore@v4
         if: github.event_name == 'issue_comment' || github.event_name == 'pull_request'
         with:
           path: ${{github.workspace}}/atlantis-data
-          key: atlantis-data
+          key: atlantis-data-${{ hashFiles('atlantis.yaml') }}
+          restore-keys: |
+            atlantis-data-
       - name: Azure login
         uses: azure/login@v2
         with:
