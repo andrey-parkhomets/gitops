@@ -2,10 +2,10 @@
 name: 'Atlantis'
 
 run-name: >-
-      ${{ contains(github.event_name, 'issue_comment')   && 
-        format('Atlantis for PR #%s', github.event.issue.number) 
-      || contains(github.event_name, 'pull_request') &&
-        format('Atlantis for PR #%s', github.event.pull_request.number) }}
+  ${{ github.event_name == 'issue_comment' &&
+      format('{0} for PR #{1}', github.event.comment.body, github.event.issue.number)
+    || github.event_name == 'pull_request' &&
+      format('atlantis plan for PR #{0}', github.event.pull_request.number) }}
 
 on:
   # Issue comments target default branch so workflow definition in main (rather than PR) is used
