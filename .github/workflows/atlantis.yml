@@ -49,13 +49,10 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "PR_NUMBER=${{ github.event.pull_request.number }}"  >> $GITHUB_OUTPUT
+            echo "pr=${{ github.event.pull_request.number }}"  >> $GITHUB_OUTPUT
           elif [[ "${{ github.event_name }}" == "issue_comment" && "${{ github.event.issue.pull_request }}" ]]; then
-            echo "PR_NUMBER=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
-          # else
-          #   echo "Not a pull request event or comment on a PR"
+            echo "pr=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
           fi
-          echo ${GITHUB_OUTPUT}
       - name: create folder for Atlantis data
         timeout-minutes: 1
         run: |
