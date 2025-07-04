@@ -89,8 +89,8 @@ module "aks" {
   maintenance_window = {
     allowed = [
       {
-        day   = "Sunday",
-        hours = [22, 23]
+        day   = "Friday",
+        hours = [20, 21, 22, 23]
       },
     ]
 
@@ -106,7 +106,7 @@ module "aks" {
     interval   = 1
     start_time = "07:00"
     utc_offset = "+01:00"
-    duration   = 16
+    duration   = 17
   }
   net_profile_dns_service_ip        = "10.0.0.10"
   net_profile_service_cidr          = "10.0.0.0/16"
