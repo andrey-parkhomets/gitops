@@ -47,12 +47,10 @@ jobs:
       - name: Get PR Number
         id: number
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "PR_NUMBER=${{ github.event.pull_request.number }}"  >> $GITHUB_OUTPUT
-          elif [[ "${{ github.event_name }}" == "issue_comment" && "${{ github.event.issue.pull_request }}" ]]; then
-            echo "PR_NUMBER=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
-          # else
-          #   echo "Not a pull request event or comment on a PR"
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+                echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          elif [ "${GITHUB_EVENT_NAME}" = "issue_comment" ] && [ -n "${{ github.event.issue.pull_request }}" ]; then
+                echo "PR_NUMBER=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
           fi
       - name: create folder for Atlantis data
         timeout-minutes: 1
