@@ -44,18 +44,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Get PR Number
+        id: number
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "pr=${{ github.event.pull_request.number }}"  >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "issue_comment" && "${{ github.event.issue.pull_request }}" ]]; then
+            echo "pr=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+          fi
       - name: create folder for Atlantis data
         timeout-minutes: 1
         run: |
           mkdir -p ${GITHUB_WORKSPACE}/atlantis-data
-          pwd
       - name: Restore Atlantis data
         id: restore-atlantis-data
         uses: actions/cache/restore@v4
         if: github.event_name == 'issue_comment' || github.event_name == 'pull_request'
         with:
           path: ${{github.workspace}}/atlantis-data
-          key: atlantis-data
+          key: atlantis-data-${{ steps.number.outputs.pr }}-${{ hashFiles('atlantis.yaml') }}
+          restore-keys: |
+            atlantis-data-${{ steps.number.outputs.pr }}-
+            atlantis-data-
       - name: Azure login
         uses: azure/login@v2
         with:
