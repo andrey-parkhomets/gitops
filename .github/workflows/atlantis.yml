@@ -43,7 +43,9 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
-
+      - name: Get PR number
+        id: number
+        uses: bcgov-nr/action-get-pr@v0.0.1
       - name: create folder for Atlantis data
         timeout-minutes: 1
         run: |
@@ -54,9 +56,9 @@ jobs:
         if: github.event_name == 'issue_comment' || github.event_name == 'pull_request'
         with:
           path: ${{github.workspace}}/atlantis-data
-          key: atlantis-data-${{ github.event.issue.number }}-${{ hashFiles('atlantis.yaml') }}
+          key: atlantis-data-${{ steps.number.outputs.pr }}-${{ hashFiles('atlantis.yaml') }}
           restore-keys: |
-            atlantis-data-${{ github.event.issue.number }}-
+            atlantis-data-${{ steps.number.outputs.pr }}-
             atlantis-data-
       - name: Azure login
         uses: azure/login@v2
