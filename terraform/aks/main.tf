@@ -89,7 +89,7 @@ module "aks" {
   maintenance_window = {
     allowed = [
       {
-        day   = "Friday",
+        day   = "Saturday",
         hours = [21, 22, 23]
       },
     ]
