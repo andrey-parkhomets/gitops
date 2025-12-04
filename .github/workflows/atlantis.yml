@@ -38,7 +38,7 @@ jobs:
         # ATLANTIS_DATA_DIR: atlantis-data
         ATLANTIS_GH_USER: ${{ github.actor }}
         ATLANTIS_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        ATLANTIS_LOCKING_DB_TYPE: redis
+        ATLANTIS_LOCKING_DB_TYPE: boltdb #redis
         ATLANTIS_REDIS_HOST: ${{ secrets.REDIS_HOST }} #redis
         ATLANTIS_REDIS_PASSWORD: ${{secrets.REDIS_PASSWORD  }}
         ATLANTIS_REDIS_PORT: ${{secrets.REDIS_PORT  }}
